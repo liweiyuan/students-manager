@@ -55,15 +55,22 @@ jobs:
           nohup dart run bin/main.dart > server.log 2>&1 &
           echo $! > server.pid
           echo "Waiting for server to start..."
+          # 增加初始等待时间
+          sleep 5
           # 等待服务器启动并检查是否正常运行
           for i in {1..30}; do
             if curl -s http://localhost:8080/students > /dev/null; then
               echo "Server is up and running!"
+              # 输出一些调试信息
+              curl -v http://localhost:8080/students
               break
             fi
             if [ $i -eq 30 ]; then
               echo "Server failed to start!"
+              echo "Server logs:"
               cat server.log
+              echo "Network status:"
+              netstat -tulpn
               exit 1
             fi
             echo "Waiting... ($i/30)"
@@ -72,13 +79,6 @@ jobs:
 
       - name: Run k6 performance test
         run: |
-          k6 run stressTest.js
-        
-      - name: Cleanup
-        if: always()
-        run: |
-          if [ -f server.pid ]; then
-            kill $(cat server.pid)
-            rm server.pid
-          fi
-          cat server.log
+          # 添加调试信息
+          echo "Starting k6 test..."
+          k6 run --verbose stressTest.js

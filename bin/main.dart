@@ -8,6 +8,6 @@ void main(List<String> arguments) async {
   final handler = const Pipeline()
       .addMiddleware(logRequests())
       .addHandler(routes.router.call);
-  final server = await serve(handler, 'localhost', 8080);
+  final server = await serve(handler, '0.0.0.0', 8080);
   print('Serving at http://${server.address.host}:${server.port}');
 }
